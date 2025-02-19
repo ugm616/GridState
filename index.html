@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Grid State.io</title>
+    <!-- Add Teko font -->
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* Reset default margins and padding */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Teko', sans-serif;
+        }
+
+        /* Prevent scrolling on html and body */
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+
+        #game-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            background-color: #1a1a1a;
+        }
+
+        /* Ensure canvas doesn't overflow */
+        canvas {
+            max-width: 90vh;
+            max-height: 90vh;
+            width: auto;
+            height: auto;
+        }
+
+        #setup-menu {
+            text-align: center;
+            padding: 20px;
+            background: #2d2d2d;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        }
+
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 24px;
+            cursor: pointer;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-family: 'Teko', sans-serif;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        h2 {
+            font-family: 'Teko', sans-serif;
+            font-size: 32px;
+            margin-bottom: 15px;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="setup-menu">
+            <h2>Select Number of AI Opponents</h2>
+            <button onclick="startGame(1)">1 Opponent</button>
+            <button onclick="startGame(2)">2 Opponents</button>
+            <button onclick="startGame(3)">3 Opponents</button>
+        </div>
+    </div>
+    <script src="game.js"></script>
+    <script>
+        let gameInstance = null;
+        
+        function startGame(opponents) {
+            const container = document.getElementById('game-container');
+            const setupMenu = document.getElementById('setup-menu');
+            container.removeChild(setupMenu);
+            
+            // Create new game with player + selected number of opponents
+            gameInstance = new GridStateGame(20, opponents + 1);
+            gameInstance.mount(container);
+
+            // Add resize handler
+            window.addEventListener('resize', () => {
+                if (gameInstance) {
+                    gameInstance.updateCanvasSize();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
