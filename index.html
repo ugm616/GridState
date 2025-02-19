@@ -72,6 +72,52 @@
             margin-bottom: 15px;
             color: #ffffff;
         }
+
+        /* Winner announcement styles */
+        .winner-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .winner-message {
+            background: #2d2d2d;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            border: 4px solid;
+            animation: popIn 0.5s ease-out;
+        }
+
+        .winner-message h2 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+
+        .winner-message p {
+            font-size: 24px;
+            margin-bottom: 25px;
+            color: #ffffff;
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body>
@@ -89,8 +135,11 @@
         
         function startGame(opponents) {
             const container = document.getElementById('game-container');
-            const setupMenu = document.getElementById('setup-menu');
-            container.removeChild(setupMenu);
+            
+            // Remove existing game or setup menu if present
+            while (container.firstChild) {
+                container.removeChild(container.firstChild);
+            }
             
             // Create new game with player + selected number of opponents
             gameInstance = new GridStateGame(20, opponents + 1);

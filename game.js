@@ -13,6 +13,7 @@ class GridStateGame {
         this.players = this.initializePlayers(numPlayers);
         this.currentPlayer = 0;
         this.selectedCell = null;
+        this.gameOver = false;
         
         // Initialize canvas and context first
         this.canvas = document.createElement('canvas');
@@ -117,6 +118,8 @@ class GridStateGame {
     }
     
     handleClick(event) {
+        if (this.gameOver) return; // Ignore clicks if game is over
+        
         const rect = this.canvas.getBoundingClientRect();
         const scaleX = this.canvas.width / rect.width;
         const scaleY = this.canvas.height / rect.height;
@@ -194,6 +197,11 @@ class GridStateGame {
     }
     
     endTurn() {
+        // Check for win condition before proceeding with the turn
+        if (this.checkWinCondition()) {
+            return; // Stop the turn if game is over
+        }
+
         // Produce new troops
         for (let y = 0; y < this.gridSize; y++) {
             for (let x = 0; x < this.gridSize; x++) {
@@ -213,8 +221,58 @@ class GridStateGame {
             this.performAITurn();
         }
     }
+
+    checkWinCondition() {
+        // Get all unique army owners present on the grid
+        const remainingArmies = new Set();
+        
+        for (let y = 0; y < this.gridSize; y++) {
+            for (let x = 0; x < this.gridSize; x++) {
+                const cell = this.grid[y][x];
+                if (cell.owner !== null) {
+                    remainingArmies.add(cell.owner);
+                }
+            }
+        }
+
+        // If only one army remains, we have a winner
+        if (remainingArmies.size === 1) {
+            const winnerId = Array.from(remainingArmies)[0];
+            this.gameOver = true;
+            this.announceWinner(winnerId);
+            return true;
+        }
+
+        return false;
+    }
+
+    announceWinner(winnerId) {
+        // Create winner announcement overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'winner-overlay';
+        
+        const message = document.createElement('div');
+        message.className = 'winner-message';
+        
+        const winnerColor = this.players[winnerId].color;
+        const isPlayer = !this.players[winnerId].isAI;
+        
+        message.innerHTML = `
+            <h2>Game Over!</h2>
+            <p>${isPlayer ? 'You have' : 'AI Player ' + winnerId + ' has'} won the game!</p>
+            <button onclick="startGame(${this.players.length - 1})">Play Again</button>
+        `;
+        
+        // Add a colored border matching the winner's color
+        message.style.borderColor = winnerColor;
+        
+        overlay.appendChild(message);
+        this.canvas.parentElement.appendChild(overlay);
+    }
     
     performAITurn() {
+        if (this.gameOver) return; // Don't perform AI turn if game is over
+        
         // Simple AI: Find strongest cell and attack/reinforce neighbors
         let strongestCell = null;
         let maxTroops = 0;
