@@ -19,6 +19,11 @@ GridState is an engaging strategy game where players must navigate and conquer a
 ## Game Elements
 - **Grid Cells**: Each cell can be empty, occupied by a player's piece, or captured.
 - **Player Pieces**: Unique pieces for each player, which can move and capture.
+- **Bonus Types**: Some cells have bonus letters in the top left corner, providing advantages:
+  - **M (Movement)**: Allows pieces to move two cells instead of one.
+  - **A (Attack)**: Increases attack strength by 50%.
+  - **P (Production)**: Doubles the troop production rate.
+  - **D (Defense)**: Increases defense strength by 50%.
 
 ## Strategies
 - **Control Key Areas**: Focus on controlling central and strategic cells.
