@@ -118,6 +118,51 @@
                 opacity: 1;
             }
         }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #2d2d2d;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            border-radius: 10px;
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .about-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            padding: 10px;
+            background: #4CAF50;
+        }
     </style>
 </head>
 <body>
@@ -129,6 +174,59 @@
             <button onclick="startGame(3)">3 Opponents</button>
         </div>
     </div>
+    <button class="about-button" onclick="openModal()">About</button>
+    <div id="game-rules-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal()">&times;</span>
+            <h2>GridState Game Rules</h2>
+            <p><strong>Game Overview</strong></p>
+            <p>GridState is an engaging strategy game where players must navigate and conquer a grid-based game board. The objective is to control the most territory by strategically moving and placing game pieces.</p>
+            
+            <p><strong>How to Play</strong></p>
+            <ol>
+                <li>Grid Layout: The game board consists of a grid of cells.</li>
+                <li>Game Pieces: Each player has a set of game pieces.</li>
+                <li>Turns: Players take turns to move their pieces.</li>
+                <li>Movement: Pieces can move to adjacent cells based on specific rules.</li>
+                <li>Capturing: Players can capture opponent pieces by surrounding them.</li>
+                <li>Winning: The game ends when all cells are occupied or no more moves are possible. The player controlling the most cells wins.</li>
+            </ol>
+            
+            <p><strong>Game Rules</strong></p>
+            <ul>
+                <li>Movement: Pieces can move vertically, horizontally, or diagonally to adjacent cells.</li>
+                <li>Capturing: To capture an opponent's piece, surround it from all sides with your pieces.</li>
+                <li>Winning: The player with the most controlled cells at the end of the game wins.</li>
+            </ul>
+            
+            <p><strong>Game Elements</strong></p>
+            <ul>
+                <li>Grid Cells: Each cell can be empty, occupied by a player's piece, or captured.</li>
+                <li>Player Pieces: Unique pieces for each player, which can move and capture.</li>
+                <li>Bonus Types: Some cells have bonus letters in the top left corner, providing advantages:</li>
+                <ul>
+                    <li>M (Movement): Allows pieces to move two cells instead of one.</li>
+                    <li>A (Attack): Increases attack strength by 50%.</li>
+                    <li>P (Production): Doubles the troop production rate.</li>
+                    <li>D (Defense): Increases defense strength by 50%.</li>
+                </ul>
+            </ul>
+            
+            <p><strong>Strategies</strong></p>
+            <ul>
+                <li>Control Key Areas: Focus on controlling central and strategic cells.</li>
+                <li>Defensive Play: Protect your pieces by positioning them wisely.</li>
+                <li>Aggressive Play: Capture opponent pieces to reduce their control.</li>
+            </ul>
+            
+            <p><strong>Contributing</strong></p>
+            <p>We welcome contributions! Please fork the repository and submit pull requests for any improvements or new features.</p>
+            
+            <p><strong>License</strong></p>
+            <p>This project is licensed under the MIT License. See the LICENSE file for details.</p>
+        </div>
+    </div>
+
     <script src="game.js"></script>
     <script>
         let gameInstance = null;
@@ -151,6 +249,22 @@
                     gameInstance.updateCanvasSize();
                 }
             });
+        }
+
+        // Modal functionalities
+        function openModal() {
+            document.getElementById("game-rules-modal").style.display = "block";
+        }
+
+        function closeModal() {
+            document.getElementById("game-rules-modal").style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById("game-rules-modal");
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
         }
     </script>
 </body>
