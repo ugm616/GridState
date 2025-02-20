@@ -34,7 +34,7 @@ class GridStateGame {
         this.updateCanvasSize();
         
         // Add click handler
-        this.canvas.addEventListener('click', (e) => this.(e));
+        this.canvas.addEventListener('click', (e) => this.handleClick(e));
     }
 
     createSurgicalStrikeButton() {
