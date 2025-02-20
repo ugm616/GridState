@@ -139,7 +139,7 @@ class GridStateGame {
             
             const pos = this.getStartingPosition(i, numPlayers);
             this.grid[pos.y][pos.x].owner = i;
-            this.grid[pos.y][pos.x].troops = 2;
+            this.grid[pos.y][pos.x].troops = 1;
         }
         
         return players;
