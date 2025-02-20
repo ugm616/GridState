@@ -383,41 +383,40 @@ class GridStateGame {
             }
         }
         
-// Use surgical strike if available (AI)
-            if (this.surgicalStrikeAvailable) {
-                this.surgicalStrikeMode = true;
-                // Find the highest value target for the strike
-                let bestTarget = null;
-                let maxValue = 0;
-                
-                for (let y = 0; y < this.gridSize; y++) {
-                    for (let x = 0; x < this.gridSize; x++) {
-                        if (this.grid[y][x].owner !== this.currentPlayer) {
-                            let totalValue = 0;
-                            // Calculate value of 3x3 area
-                            for (let dy = -1; dy <= 1; dy++) {
-                                for (let dx = -1; dx <= 1; dx++) {
-                                    const nx = x + dx;
-                                    const ny = y + dy;
-                                    if (nx >= 0 && nx < this.gridSize && ny >= 0 && ny < this.gridSize) {
-                                        const cell = this.grid[ny][nx];
-                                        if (cell.owner !== this.currentPlayer) {
-                                            totalValue += cell.troops;
-                                        }
+        // Use surgical strike if available (AI)
+        if (this.surgicalStrikeAvailable) {
+            this.surgicalStrikeMode = true;
+            // Find the highest value target for the strike
+            let bestTarget = null;
+            let maxValue = 0;
+            
+            for (let y = 0; y < this.gridSize; y++) {
+                for (let x = 0; x < this.gridSize; x++) {
+                    if (this.grid[y][x].owner !== this.currentPlayer) {
+                        let totalValue = 0;
+                        // Calculate value of 3x3 area
+                        for (let dy = -1; dy <= 1; dy++) {
+                            for (let dx = -1; dx <= 1; dx++) {
+                                const nx = x + dx;
+                                const ny = y + dy;
+                                if (nx >= 0 && nx < this.gridSize && ny >= 0 && ny < this.gridSize) {
+                                    const cell = this.grid[ny][nx];
+                                    if (cell.owner !== this.currentPlayer) {
+                                        totalValue += cell.troops;
                                     }
                                 }
                             }
-                            if (totalValue > maxValue) {
-                                maxValue = totalValue;
-                                bestTarget = { x, y };
-                            }
+                        }
+                        if (totalValue > maxValue) {
+                            maxValue = totalValue;
+                            bestTarget = { x, y };
                         }
                     }
                 }
-                
-                if (bestTarget) {
-                    this.performSurgicalStrike(bestTarget.x, bestTarget.y);
-                }
+            }
+            
+            if (bestTarget) {
+                this.performSurgicalStrike(bestTarget.x, bestTarget.y);
             }
         }
         
