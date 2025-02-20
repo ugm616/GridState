@@ -139,7 +139,7 @@ class GridStateGame {
             
             const pos = this.getStartingPosition(i, numPlayers);
             this.grid[pos.y][pos.x].owner = i;
-            this.grid[pos.y][pos.x].troops = 1;
+            this.grid[pos.y][pos.x].troops = 20;
         }
         
         return players;
@@ -467,11 +467,12 @@ class GridStateGame {
                 }
                 this.ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
                 
-                // Draw bonus indicator with Teko font
-                if (cell.bonus) {
+                // Draw bonus indicator with Teko font - Hide Mystery squares
+                if (cell.bonus && cell.bonus !== BonusType.MYSTERY) {
                     this.ctx.fillStyle = '#ffffff'; // White text
                     this.ctx.font = `${bonusFontSize}px Teko`;
-                    this.ctx.fillText(cell.bonus[0], 
+                    const bonusSymbol = cell.bonus[0];  // First letter for non-Mystery bonuses
+                    this.ctx.fillText(bonusSymbol, 
                         x * cellSize + (cellSize * 0.1), 
                         y * cellSize + (cellSize * 0.4));
                 }
