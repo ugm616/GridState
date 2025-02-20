@@ -3,11 +3,14 @@ const BonusType = {
     PRODUCTION: 'PRODUCTION',
     DEFENSE: 'DEFENSE',
     ATTACK: 'ATTACK',
-    MOVEMENT: 'MOVEMENT'
+    MOVEMENT: 'MOVEMENT',
+    MYSTERY: 'MYSTERY'  // Add Mystery type
 };
 
-// Define troop production cap
+// Define game constants
 const TROOP_PRODUCTION_CAP = 100;
+const MYSTERY_SQUARE_COUNT = 10;  // Number of mystery squares to place
+const SURGICAL_STRIKE_DAMAGE = 100;  // Damage to surrounding squares
 
 class GridStateGame {
     constructor(size, numPlayers) {
@@ -17,16 +20,36 @@ class GridStateGame {
         this.currentPlayer = 0;
         this.selectedCell = null;
         this.gameOver = false;
+        this.surgicalStrikeAvailable = false;
+        this.surgicalStrikeMode = false;
         
         // Initialize canvas and context first
         this.canvas = document.createElement('canvas');
         this.ctx = this.canvas.getContext('2d');
+        
+        // Create surgical strike button
+        this.createSurgicalStrikeButton();
         
         // Then update the canvas size
         this.updateCanvasSize();
         
         // Add click handler
         this.canvas.addEventListener('click', (e) => this.handleClick(e));
+    }
+
+    createSurgicalStrikeButton() {
+        this.surgicalStrikeButton = document.createElement('button');
+        this.surgicalStrikeButton.className = 'surgical-strike-button';
+        this.surgicalStrikeButton.textContent = 'Surgical Strike';
+        this.surgicalStrikeButton.style.display = 'none';
+        this.surgicalStrikeButton.addEventListener('click', () => this.activateSurgicalStrike());
+    }
+
+    activateSurgicalStrike() {
+        if (this.surgicalStrikeAvailable) {
+            this.surgicalStrikeMode = true;
+            this.surgicalStrikeButton.style.backgroundColor = '#ff0000';
+        }
     }
     
     updateCanvasSize() {
@@ -69,19 +92,33 @@ class GridStateGame {
                 grid[y][x] = {
                     owner: null,
                     troops: 0,
-                    bonus: this.generateRandomBonus()
+                    bonus: null
                 };
             }
         }
-        return grid;
-    }
-    
-    generateRandomBonus() {
-        if (Math.random() < 0.2) { // 20% chance of getting a bonus
-            const bonuses = Object.values(BonusType);
-            return bonuses[Math.floor(Math.random() * bonuses.length)];
+
+        // Place mystery squares randomly
+        let mysterySquaresPlaced = 0;
+        while (mysterySquaresPlaced < MYSTERY_SQUARE_COUNT) {
+            const x = Math.floor(Math.random() * this.gridSize);
+            const y = Math.floor(Math.random() * this.gridSize);
+            if (grid[y][x].bonus === null) {
+                grid[y][x].bonus = BonusType.MYSTERY;
+                mysterySquaresPlaced++;
+            }
         }
-        return null;
+
+        // Place other bonuses
+        for (let y = 0; y < this.gridSize; y++) {
+            for (let x = 0; x < this.gridSize; x++) {
+                if (grid[y][x].bonus === null && Math.random() < 0.2) {
+                    const bonuses = Object.values(BonusType).filter(b => b !== BonusType.MYSTERY);
+                    grid[y][x].bonus = bonuses[Math.floor(Math.random() * bonuses.length)];
+                }
+            }
+        }
+
+        return grid;
     }
     
     initializePlayers(numPlayers) {
@@ -121,8 +158,8 @@ class GridStateGame {
     }
     
     handleClick(event) {
-        if (this.gameOver) return; // Ignore clicks if game is over
-        
+        if (this.gameOver) return;
+
         const rect = this.canvas.getBoundingClientRect();
         const scaleX = this.canvas.width / rect.width;
         const scaleY = this.canvas.height / rect.height;
@@ -130,8 +167,10 @@ class GridStateGame {
         const x = Math.floor(((event.clientX - rect.left) * scaleX) / (this.canvas.width / this.gridSize));
         const y = Math.floor(((event.clientY - rect.top) * scaleY) / (this.canvas.height / this.gridSize));
         
-        // Ignore clicks outside the grid
-        if (x < 0 || x >= this.gridSize || y < 0 || y >= this.gridSize) {
+        if (x < 0 || x >= this.gridSize || y < 0 || y >= this.gridSize) return;
+
+        if (this.surgicalStrikeMode) {
+            this.performSurgicalStrike(x, y);
             return;
         }
         
@@ -170,6 +209,15 @@ class GridStateGame {
         const sourceCell = this.grid[from.y][from.x];
         const targetCell = this.grid[to.y][to.x];
         
+        // Check if target is a mystery square
+        if (targetCell.bonus === BonusType.MYSTERY && targetCell.owner !== sourceCell.owner) {
+            // Activate surgical strike
+            this.surgicalStrikeAvailable = true;
+            this.surgicalStrikeButton.style.display = 'block';
+            // Remove the mystery bonus after discovery
+            targetCell.bonus = null;
+        }
+
         // Keep 1 troop behind, rest attack
         const movingTroops = sourceCell.troops - 1;
         
@@ -197,6 +245,37 @@ class GridStateGame {
                 targetCell.troops = Math.floor(defenseStrength - attackStrength);
             }
         }
+    }
+
+    performSurgicalStrike(centerX, centerY) {
+        // Perform the strike on 3x3 area
+        for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 1; dx++) {
+                const x = centerX + dx;
+                const y = centerY + dy;
+                if (x >= 0 && x < this.gridSize && y >= 0 && y < this.gridSize) {
+                    const cell = this.grid[y][x];
+                    if (dx === 0 && dy === 0) {
+                        // Center square is completely cleared
+                        cell.troops = 0;
+                        cell.owner = null;
+                    } else if (cell.troops > 0) {
+                        // Surrounding squares lose troops
+                        cell.troops = Math.max(0, cell.troops - SURGICAL_STRIKE_DAMAGE);
+                        if (cell.troops === 0) {
+                            cell.owner = null;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Reset surgical strike state
+        this.surgicalStrikeMode = false;
+        this.surgicalStrikeAvailable = false;
+        this.surgicalStrikeButton.style.display = 'none';
+        this.surgicalStrikeButton.style.backgroundColor = '';
+        this.endTurn();
     }
     
     endTurn() {
@@ -304,6 +383,44 @@ class GridStateGame {
             }
         }
         
+// Use surgical strike if available (AI)
+            if (this.surgicalStrikeAvailable) {
+                this.surgicalStrikeMode = true;
+                // Find the highest value target for the strike
+                let bestTarget = null;
+                let maxValue = 0;
+                
+                for (let y = 0; y < this.gridSize; y++) {
+                    for (let x = 0; x < this.gridSize; x++) {
+                        if (this.grid[y][x].owner !== this.currentPlayer) {
+                            let totalValue = 0;
+                            // Calculate value of 3x3 area
+                            for (let dy = -1; dy <= 1; dy++) {
+                                for (let dx = -1; dx <= 1; dx++) {
+                                    const nx = x + dx;
+                                    const ny = y + dy;
+                                    if (nx >= 0 && nx < this.gridSize && ny >= 0 && ny < this.gridSize) {
+                                        const cell = this.grid[ny][nx];
+                                        if (cell.owner !== this.currentPlayer) {
+                                            totalValue += cell.troops;
+                                        }
+                                    }
+                                }
+                            }
+                            if (totalValue > maxValue) {
+                                maxValue = totalValue;
+                                bestTarget = { x, y };
+                            }
+                        }
+                    }
+                }
+                
+                if (bestTarget) {
+                    this.performSurgicalStrike(bestTarget.x, bestTarget.y);
+                }
+            }
+        }
+        
         this.endTurn();
     }
     
@@ -387,13 +504,13 @@ class GridStateGame {
                 cellSize,
                 cellSize
             );
-            
             this.ctx.lineWidth = 1;
         }
     }
     
     mount(container) {
         container.appendChild(this.canvas);
+        container.appendChild(this.surgicalStrikeButton);
         this.render();
     }
 }
