@@ -387,11 +387,7 @@ class GridStateGame {
                 cellSize,
                 cellSize
             );
-            this.selectedCell.x * cellSize,
-                this.selectedCell.y * cellSize,
-                cellSize,
-                cellSize
-            );
+            
             this.ctx.lineWidth = 1;
         }
     }
