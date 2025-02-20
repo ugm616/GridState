@@ -8,7 +8,7 @@ const BonusType = {
 };
 
 // Define game constants
-const TROOP_PRODUCTION_CAP = 100;
+const TROOP_PRODUCTION_CAP = 50;
 const MYSTERY_SQUARE_COUNT = 10;  // Number of mystery squares to place
 const SURGICAL_STRIKE_DAMAGE = 100;  // Damage to surrounding squares
 
