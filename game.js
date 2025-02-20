@@ -34,7 +34,7 @@ class GridStateGame {
         this.updateCanvasSize();
         
         // Add click handler
-        this.canvas.addEventListener('click', (e) => this.handleClick(e));
+        this.canvas.addEventListener('click', (e) => this.(e));
     }
 
     createSurgicalStrikeButton() {
@@ -158,38 +158,41 @@ class GridStateGame {
     }
     
     handleClick(event) {
-        if (this.gameOver) return;
+    if (this.gameOver) return;
 
-        const rect = this.canvas.getBoundingClientRect();
-        const scaleX = this.canvas.width / rect.width;
-        const scaleY = this.canvas.height / rect.height;
-        
-        const x = Math.floor(((event.clientX - rect.left) * scaleX) / (this.canvas.width / this.gridSize));
-        const y = Math.floor(((event.clientY - rect.top) * scaleY) / (this.canvas.height / this.gridSize));
-        
-        if (x < 0 || x >= this.gridSize || y < 0 || y >= this.gridSize) return;
+    const rect = this.canvas.getBoundingClientRect();
+    const scaleX = this.canvas.width / rect.width;
+    const scaleY = this.canvas.height / rect.height;
+    
+    const x = Math.floor(((event.clientX - rect.left) * scaleX) / (this.canvas.width / this.gridSize));
+    const y = Math.floor(((event.clientY - rect.top) * scaleY) / (this.canvas.height / this.gridSize));
+    
+    if (x < 0 || x >= this.gridSize || y < 0 || y >= this.gridSize) return;
 
-        if (this.surgicalStrikeMode) {
-            this.performSurgicalStrike(x, y);
-            return;
-        }
-        
-        if (!this.selectedCell) {
-            // Select cell if it belongs to current player
-            if (this.grid[y][x].owner === this.currentPlayer) {
-                this.selectedCell = { x, y };
-                this.render(); // Highlight selected cell
-            }
-        } else {
-            // Try to move troops if move is valid
-            if (this.isValidMove(this.selectedCell, { x, y })) {
-                this.moveTroops(this.selectedCell, { x, y });
-                this.endTurn();
-            }
-            this.selectedCell = null;
-            this.render();
-        }
+    if (this.surgicalStrikeMode) {
+        this.performSurgicalStrike(x, y);
+        return;
     }
+    
+    if (!this.selectedCell) {
+        // Select cell if it belongs to current player
+        if (this.grid[y][x].owner === this.currentPlayer) {
+            this.selectedCell = { x, y };
+            this.render(); // Highlight selected cell
+        }
+    } else {
+        // Try to move troops if move is valid
+        if (this.isValidMove(this.selectedCell, { x, y })) {
+            this.moveTroops(this.selectedCell, { x, y });
+            this.endTurn();
+            this.selectedCell = null;  // Only clear selection if move was valid
+        } else if (this.grid[y][x].owner === this.currentPlayer) {
+            // If clicking on another owned cell, select that instead
+            this.selectedCell = { x, y };
+        }
+        this.render();
+    }
+}
     
     isValidMove(from, to) {
         const dx = Math.abs(to.x - from.x);
