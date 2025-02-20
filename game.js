@@ -6,6 +6,9 @@ const BonusType = {
     MOVEMENT: 'MOVEMENT'
 };
 
+// Define troop production cap
+const TROOP_PRODUCTION_CAP = 100;
+
 class GridStateGame {
     constructor(size, numPlayers) {
         this.gridSize = 20;
@@ -178,7 +181,7 @@ class GridStateGame {
         sourceCell.troops = 1; // Leave exactly 1 troop behind
         
         if (targetCell.owner === sourceCell.owner) {
-            // Reinforcement
+            // Reinforcement - no cap when merging friendly troops
             targetCell.troops += movingTroops;
         } else {
             // Attack
@@ -202,13 +205,16 @@ class GridStateGame {
             return; // Stop the turn if game is over
         }
 
-        // Produce new troops
+        // Produce new troops with cap
         for (let y = 0; y < this.gridSize; y++) {
             for (let x = 0; x < this.gridSize; x++) {
                 const cell = this.grid[y][x];
                 if (cell.owner !== null) {
                     const productionRate = cell.bonus === BonusType.PRODUCTION ? 2 : 1;
-                    cell.troops += productionRate;
+                    // Only add troops if below cap
+                    if (cell.troops < TROOP_PRODUCTION_CAP) {
+                        cell.troops = Math.min(TROOP_PRODUCTION_CAP, cell.troops + productionRate);
+                    }
                 }
             }
         }
@@ -386,7 +392,4 @@ class GridStateGame {
     }
     
     mount(container) {
-        container.appendChild(this.canvas);
-        this.render();
-    }
-}
+        container.appendChild(this
